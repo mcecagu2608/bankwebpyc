@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crear cuenta</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>Crear cuenta</h1>
+
+    <form method="POST">
+        <label>Nombre</label>
+        <input type="text" name="name" placeholder="Nombre de la cuenta" required>
+
+        <label>Tipo</label>
+        <input type="text" name="type" placeholder="Ej. bancaria, efectivo" required>
+
+        <label>Saldo inicial</label>
+        <input type="number" name="initial_balance" value="0" min="0" step="1" required>
+
+        <button type="submit">Guardar cuenta</button>
+    </form>
+
+    <br>
+    <a href="{{ url_for('index') }}">⬅️ Volver</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crear categoría</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>Crear categoría</h1>
+
+    <p>Las categorías base <strong>Ingreso</strong> y <strong>Gasto</strong> ya existen en el sistema. Crea otras categorías solo si quieres organizar mejor tus transacciones.</p>
+
+    <form method="POST">
+        <label>Nombre</label>
+        <input type="text" name="name" placeholder="Nombre de la categoría" required>
+
+        <label>Tipo</label>
+        <select name="type" required>
+            <option value="income">Ingreso</option>
+            <option value="expense">Gasto</option>
+        </select>
+
+        <button type="submit">Guardar categoría</button>
+    </form>
+
+    <br>
+    <a href="{{ url_for('index') }}">⬅️ Volver</a>
+</div>
+
+</body>
+</html>

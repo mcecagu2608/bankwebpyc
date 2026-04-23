@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crear usuario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>Nuevo usuario</h1>
+
+    <form method="POST">
+        <input type="text" name="name" placeholder="Nombre..." required>
+        <button type="submit">Guardar</button>
+    </form>
+
+    <br>
+    <a href="/">⬅️ Volver</a>
+</div>
+
+</body>
+</html>

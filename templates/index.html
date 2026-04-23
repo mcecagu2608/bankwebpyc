@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transacciones</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>Transacciones</h1>
+
+    <div class="actions">
+        <a href="{{ url_for('create_transaction') }}"><button>➕ Añadir transacción</button></a>
+        <a href="{{ url_for('create_account') }}"><button>🏦 Nueva cuenta</button></a>
+        <a href="{{ url_for('create_category') }}"><button>📁 Nueva categoría</button></a>
+        <a href="{{ url_for('balance') }}"><button>📊 Ver saldo</button></a>
+    </div>
+
+    <form action="{{ url_for('index') }}" method="GET" class="filter-form">
+        <label for="category_id">Filtrar por categoría</label>
+        <select name="category_id" id="category_id">
+            <option value="">Todas las categorías</option>
+            {% for category in categories %}
+                <option value="{{ category[0] }}" {% if selected_category_id == category[0] %}selected{% endif %}>
+                    {{ category[1] }} ({{ category[2] }})
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit">Filtrar</button>
+        {% if selected_category_id %}
+            <a href="{{ url_for('index') }}"><button type="button">Limpiar filtro</button></a>
+        {% endif %}
+    </form>
+
+    {% if transactions %}
+        <ul class="transaction-list">
+            {% for transaction in transactions %}
+                <li>
+                    <div class="transaction-header">
+                        <strong>{{ transaction[2] | capitalize }}</strong>
+                        <span class="amount">{{ transaction[1] }}</span>
+                    </div>
+                    <div class="transaction-details">
+                        <p>{{ transaction[3] or 'Sin descripción' }}</p>
+                        <p>Fecha: {{ transaction[4] }}</p>
+                        <p>Cuenta: {{ transaction[5] }}</p>
+                        <p>Categoría: {{ transaction[6] }}</p>
+                    </div>
+                    <div class="transaction-actions">
+                        <a href="/delete/{{ transaction[0] }}">❌ Eliminar</a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay transacciones registradas todavía.</p>
+    {% endif %}
+</div>
+
+</body>
+</html>

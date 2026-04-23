@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crear transacción</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>Crear transacción</h1>
+
+    {% if not accounts or not categories %}
+        <p>Necesitas al menos una cuenta y una categoría para crear una transacción.</p>
+        <p>
+            <a href="{{ url_for('create_account') }}">Crear cuenta</a> |
+            <a href="{{ url_for('create_category') }}">Crear categoría</a>
+        </p>
+    {% else %}
+        <form method="POST">
+            <label>Cuentas</label>
+            <select name="account_id" required>
+                {% for account in accounts %}
+                    <option value="{{ account[0] }}">{{ account[1] }} (Saldo inicial: {{ account[4] }})</option>
+                {% endfor %}
+            </select>
+
+            <label>Categorías</label>
+            <select name="category_id" required>
+                {% for category in categories %}
+                    <option value="{{ category[0] }}">{{ category[1] }} ({{ category[2] }})</option>
+                {% endfor %}
+            </select>
+
+            <p class="note">El sistema detecta automáticamente si es un ingreso o un gasto según la categoría seleccionada.</p>
+
+            <label>Monto</label>
+            <input type="number" name="amount" min="0" step="1" required>
+
+            <label>Descripción</label>
+            <input type="text" name="description" placeholder="Descripción...">
+
+            <label>Fecha</label>
+            <input type="date" name="date" required>
+
+            <button type="submit">Guardar transacción</button>
+        </form>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('index') }}">⬅️ Volver</a>
+</div>
+
+</body>
+</html>
