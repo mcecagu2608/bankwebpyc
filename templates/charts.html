@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gráficas financieras</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>📊 Tablero de gráficos</h1>
+
+    <form action="{{ url_for('charts') }}" method="GET" class="filter-form">
+        <label for="account_id">Filtrar por cuenta</label>
+        <div class="filter-actions">
+            <select name="account_id" id="account_id">
+                <option value="">Todas las cuentas</option>
+                {% for account in all_accounts %}
+                    <option value="{{ account[0] }}" {% if account_filter == account[0] %}selected{% endif %}>
+                        {{ account[1] }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button class="button primary" type="submit">Filtrar</button>
+            {% if account_filter %}
+                <a class="button tertiary" href="{{ url_for('charts') }}">Limpiar</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <h2>Categorías</h2>
+            {% if category_totals %}
+                <ul>
+                    {% for category in category_totals %}
+                        <li class="category-item {{ category[1] }}">
+                            <span>{{ category[0] }}</span>
+                            <strong class="amount-summary {{ category[1] }}">{{ category[2] if category[2] else 0 }} €</strong>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Aún no hay transacciones para mostrar.</p>
+            {% endif %}
+        </div>
+
+        <div class="summary-card">
+            <h2>Cuentas</h2>
+            {% if account_balances %}
+                <ul>
+                    {% for account in account_balances %}
+                        <li class="account-item {% if account[1] > 0 %}positive{% else %}negative{% endif %}">
+                            <span>{{ account[0] }}</span>
+                            <strong class="amount-summary">{{ account[1] }} €</strong>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay cuentas registradas aún.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <h2>Ingresos y gastos por categoría</h2>
+        <canvas id="categoryChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+        <h2>Balance de cuentas</h2>
+        <canvas id="accountsChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+        <h2>Movimiento mensual</h2>
+        <canvas id="monthlyChart"></canvas>
+    </div>
+
+    <div class="footer-links">
+        <a class="button secondary" href="{{ url_for('index') }}">⬅️ Volver</a>
+        <a class="button tertiary" href="{{ url_for('create_transaction') }}">➕ Crear transacción</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const categoryLabels = {{ category_labels | tojson }};
+    const categoryValues = {{ category_amounts | tojson }};
+    const categoryTypes = {{ category_types | tojson }};
+    const categoryColors = categoryTypes.map(type => type === 'expense' ? '#ef4444' : '#22c55e');
+
+    const accountLabels = {{ account_labels | tojson }};
+    const accountValues = {{ account_values | tojson }};
+    const accountColors = accountValues.map(val => val > 0 ? '#10b981' : '#ef4444');
+
+    const monthlyLabels = {{ monthly_labels | tojson }};
+    const monthlyIncome = {{ monthly_income | tojson }};
+    const monthlyExpense = {{ monthly_expense | tojson }};
+
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'bar',
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                label: 'Total por categoría',
+                data: categoryValues,
+                backgroundColor: categoryColors,
+                borderRadius: 12,
+                borderWidth: 0,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { 
+                legend: { display: false },
+                filler: { propagate: true }
+            },
+            scales: { 
+                y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('accountsChart'), {
+        type: 'doughnut',
+        data: {
+            labels: accountLabels,
+            datasets: [{
+                data: accountValues,
+                backgroundColor: accountColors,
+                borderWidth: 2,
+                borderColor: 'rgba(20, 23, 28, 0.96)'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { 
+                legend: { position: 'bottom', labels: { padding: 20, font: { size: 14 } } }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('monthlyChart'), {
+        type: 'line',
+        data: {
+            labels: monthlyLabels,
+            datasets: [
+                {
+                    label: 'Ingresos',
+                    data: monthlyIncome,
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#22c55e',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    borderWidth: 3
+                },
+                {
+                    label: 'Gastos',
+                    data: monthlyExpense,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#ef4444',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    borderWidth: 3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { 
+                legend: { position: 'bottom', labels: { padding: 20, font: { size: 14 } } }
+            },
+            scales: { 
+                y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                x: { grid: { color: 'rgba(255, 255, 255, 0.05)' } }
+            }
+        }
+    });
+</script>
+</body>
+</html>
+

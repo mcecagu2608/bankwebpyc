@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editar transacción</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>Editar transacción</h1>
+
+    <form method="POST" class="transaction-form">
+        <label>Cuenta</label>
+        <select name="account_id" required>
+            {% for account in accounts %}
+                <option value="{{ account[0] }}" {% if account[0] == transaction[1] %}selected{% endif %}>
+                    {{ account[1] }} (Saldo inicial: {{ account[4] }})
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>Categoría</label>
+        <select name="category_id" required>
+            {% if income_categories %}
+                <optgroup label="Ingresos">
+                    {% for category in income_categories %}
+                        <option value="{{ category[0] }}" {% if category[0] == transaction[2] %}selected{% endif %}>{{ category[1] }}</option>
+                    {% endfor %}
+                </optgroup>
+            {% endif %}
+            {% if expense_categories %}
+                <optgroup label="Gastos">
+                    {% for category in expense_categories %}
+                        <option value="{{ category[0] }}" {% if category[0] == transaction[2] %}selected{% endif %}>{{ category[1] }}</option>
+                    {% endfor %}
+                </optgroup>
+            {% endif %}
+        </select>
+
+        <p class="note">Usa montos positivos para ingresos y negativos para gastos. El sistema ajusta el tipo automáticamente.</p>
+
+        <label>Monto</label>
+        <input type="number" name="amount" step="1" value="{% if transaction[6] == 'expense' %}-{{ transaction[3] }}{% else %}{{ transaction[3] }}{% endif %}" required>
+
+        <label>Descripción</label>
+        <input type="text" name="description" value="{{ transaction[4] }}" placeholder="Descripción...">
+
+        <label>Fecha</label>
+        <input type="date" name="date" value="{{ transaction[5] }}" required>
+
+        <button class="button primary" type="submit">Actualizar transacción</button>
+    </form>
+
+    <div class="footer-links">
+        <a class="button secondary" href="{{ url_for('index') }}">⬅️ Volver al listado</a>
+        <a class="button tertiary" href="{{ url_for('charts') }}">📈 Ver gráficas</a>
+    </div>
+</div>
+</body>
+</html>

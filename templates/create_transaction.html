@@ -9,14 +9,17 @@
 <div class="container">
     <h1>Crear transacción</h1>
 
-    {% if not accounts or not categories %}
-        <p>Necesitas al menos una cuenta y una categoría para crear una transacción.</p>
-        <p>
-            <a href="{{ url_for('create_account') }}">Crear cuenta</a> |
-            <a href="{{ url_for('create_category') }}">Crear categoría</a>
-        </p>
+    {% if not accounts or (not income_categories and not expense_categories) %}
+        <div class="empty-state">
+            <h2>Necesitas cuentas y categorías</h2>
+            <p>Para agregar una transacción primero crea al menos una cuenta y una categoría.</p>
+            <div class="empty-actions">
+                <a class="button primary" href="{{ url_for('create_account') }}">Crear cuenta</a>
+                <a class="button tertiary" href="{{ url_for('create_category') }}">Crear categoría</a>
+            </div>
+        </div>
     {% else %}
-        <form method="POST">
+        <form method="POST" class="transaction-form">
             <label>Cuentas</label>
             <select name="account_id" required>
                 {% for account in accounts %}
@@ -26,15 +29,26 @@
 
             <label>Categorías</label>
             <select name="category_id" required>
-                {% for category in categories %}
-                    <option value="{{ category[0] }}">{{ category[1] }} ({{ category[2] }})</option>
-                {% endfor %}
+                {% if income_categories %}
+                    <optgroup label="Ingresos">
+                        {% for category in income_categories %}
+                            <option value="{{ category[0] }}">{{ category[1] }}</option>
+                        {% endfor %}
+                    </optgroup>
+                {% endif %}
+                {% if expense_categories %}
+                    <optgroup label="Gastos">
+                        {% for category in expense_categories %}
+                            <option value="{{ category[0] }}">{{ category[1] }}</option>
+                        {% endfor %}
+                    </optgroup>
+                {% endif %}
             </select>
 
-            <p class="note">El sistema detecta automáticamente si es un ingreso o un gasto según la categoría seleccionada.</p>
+            <p class="note">Usa montos positivos para ingresos y negativos para gastos. El sistema ajusta el tipo automáticamente.</p>
 
             <label>Monto</label>
-            <input type="number" name="amount" min="0" step="1" required>
+            <input type="number" name="amount" step="1" placeholder="Ej. 1200 o -350" required>
 
             <label>Descripción</label>
             <input type="text" name="description" placeholder="Descripción...">
@@ -42,7 +56,7 @@
             <label>Fecha</label>
             <input type="date" name="date" required>
 
-            <button type="submit">Guardar transacción</button>
+            <button class="button primary" type="submit">Guardar transacción</button>
         </form>
     {% endif %}
 

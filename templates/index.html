@@ -10,26 +10,38 @@
     <h1>Transacciones</h1>
 
     <div class="actions">
-        <a href="{{ url_for('create_transaction') }}"><button>➕ Añadir transacción</button></a>
-        <a href="{{ url_for('create_account') }}"><button>🏦 Nueva cuenta</button></a>
-        <a href="{{ url_for('create_category') }}"><button>📁 Nueva categoría</button></a>
-        <a href="{{ url_for('balance') }}"><button>📊 Ver saldo</button></a>
+        <a class="button primary" href="{{ url_for('create_transaction') }}">➕ Añadir transacción</a>
+        <a class="button" href="{{ url_for('create_account') }}">🏦 Nueva cuenta</a>
+        <a class="button" href="{{ url_for('create_category') }}">📁 Nueva categoría</a>
+        <a class="button" href="{{ url_for('balance') }}">📊 Ver saldo</a>
+        <a class="button secondary" href="{{ url_for('charts') }}">📈 Ver gráficas</a>
     </div>
 
     <form action="{{ url_for('index') }}" method="GET" class="filter-form">
         <label for="category_id">Filtrar por categoría</label>
         <select name="category_id" id="category_id">
             <option value="">Todas las categorías</option>
-            {% for category in categories %}
-                <option value="{{ category[0] }}" {% if selected_category_id == category[0] %}selected{% endif %}>
-                    {{ category[1] }} ({{ category[2] }})
-                </option>
-            {% endfor %}
+            {% if income_categories %}
+                <optgroup label="Ingresos">
+                    {% for category in income_categories %}
+                        <option value="{{ category[0] }}" {% if selected_category_id == category[0] %}selected{% endif %}>{{ category[1] }}</option>
+                    {% endfor %}
+                </optgroup>
+            {% endif %}
+            {% if expense_categories %}
+                <optgroup label="Gastos">
+                    {% for category in expense_categories %}
+                        <option value="{{ category[0] }}" {% if selected_category_id == category[0] %}selected{% endif %}>{{ category[1] }}</option>
+                    {% endfor %}
+                </optgroup>
+            {% endif %}
         </select>
-        <button type="submit">Filtrar</button>
-        {% if selected_category_id %}
-            <a href="{{ url_for('index') }}"><button type="button">Limpiar filtro</button></a>
-        {% endif %}
+        <div class="filter-actions">
+            <button class="button" type="submit">Filtrar</button>
+            {% if selected_category_id %}
+                <a class="button tertiary" href="{{ url_for('index') }}">Limpiar filtro</a>
+            {% endif %}
+        </div>
     </form>
 
     {% if transactions %}
@@ -37,17 +49,20 @@
             {% for transaction in transactions %}
                 <li>
                     <div class="transaction-header">
-                        <strong>{{ transaction[2] | capitalize }}</strong>
-                        <span class="amount">{{ transaction[1] }}</span>
+                        <div>
+                            <span class="tag {{ transaction[2] }}">{{ transaction[2] | capitalize }}</span>
+                            <strong>{{ transaction[5] }}</strong>
+                        </div>
+                        <span class="amount {{ transaction[2] }}">{% if transaction[2] == 'expense' %}-{% else %}+{% endif %}{{ transaction[1] }} €</span>
                     </div>
                     <div class="transaction-details">
                         <p>{{ transaction[3] or 'Sin descripción' }}</p>
                         <p>Fecha: {{ transaction[4] }}</p>
-                        <p>Cuenta: {{ transaction[5] }}</p>
                         <p>Categoría: {{ transaction[6] }}</p>
                     </div>
                     <div class="transaction-actions">
-                        <a href="/delete/{{ transaction[0] }}">❌ Eliminar</a>
+                        <a class="button tertiary" href="{{ url_for('edit_transaction', id=transaction[0]) }}">✏️ Editar</a>
+                        <a class="button danger" href="/delete/{{ transaction[0] }}">❌ Eliminar</a>
                     </div>
                 </li>
             {% endfor %}
